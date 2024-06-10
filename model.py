@@ -35,6 +35,7 @@ class KoopmanCNN(nn.Module):
 
         # ----- X.shape: b x t x c x w x h ------
         Z = self.encoder(X)
+        print(Z.shape)
 
         # latent both noise - another option to stabilize the numeric calculation of the Koopman matrix
         if train and self.args.noise in ["latent_both"]:
@@ -367,11 +368,12 @@ class encNet(nn.Module):
         h3 = self.c3(h2)
         h4 = self.c4(h3)
         h5 = self.c5(h4)
-
+        print("Before LSTM: {shape}".format(shape=h5.shape))
         # lstm
         if self.args.rnn in ["encoder", "both"]:
             h5 = self.lstm(h5.reshape(-1, self.n_frames, self.k_dim))[0].reshape(-1, self.hidden_dim, 1, 1)
 
+        print("After LSTM: {shape}".format(shape=h5.shape))
         return h5
 
 
@@ -448,21 +450,28 @@ class KoopmanLayer(nn.Module):
     def forward(self, Z):
         # Z is in b * t x c x 1 x 1
         Zr = Z.squeeze().reshape(-1, self.n_frames, self.k_dim)
+        print("Z: {shape}".format(shape=Z.shape))
+        print("Zr: {shape}".format(shape=Zr.shape))
+
 
         if self.training and self.args.noise in ["latent"]:
             Zr = Zr + 0.003 * torch.rand(Zr.shape).to(Zr.device)
 
         # split
         X, Y = Zr[:, :-1], Zr[:, 1:]
+        print("X: {shape}".format(shape=X.shape))
+        print("Y: {shape}".format(shape=Y.shape))
 
         # solve linear system (broadcast)
         # Ct = torch.linalg.pinv(X.reshape(-1, self.k_dim)) @ Y.reshape(-1, self.k_dim)
         Ct = torch.linalg.lstsq(X.reshape(-1, self.k_dim), Y.reshape(-1, self.k_dim)).solution
+        print("Ct: {shape}".format(shape=Ct.shape))
 
         # predict (broadcast)
         Y2 = X @ Ct
+        print("Y2: {shape}".format(shape=Y2.shape))
         Z2 = torch.cat((X[:, 0].unsqueeze(dim=1), Y2), dim=1)
-
+        print("Z2: {shape}".format(shape=Z2.shape))
         assert (torch.sum(torch.isnan(Y2)) == 0)
 
         return Z2.reshape(Z.shape), Ct
@@ -518,8 +527,8 @@ class KoopmanLayer(nn.Module):
             E3_static = torch.zeros(1).to(self.args.device)
 
         # report unique number
-        if self.run:
-            self.run['general/static_eigen_vals_number'].log(new_static_number)
+        # if self.run:
+        #     self.run['general/static_eigen_vals_number'].log(new_static_number)
 
         if self.dynamic_loss_mode == 'strict':
             Dnd = torch.index_select(Dn, 0, Id)

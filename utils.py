@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 
 
 def t_to_np(X):
+    if isinstance(X, np.ndarray):
+        return X
     if X.dtype in [torch.float32, torch.float64]:
         X = X.detach().cpu().numpy()
     return X

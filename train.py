@@ -179,7 +179,7 @@ def train(args):
 
     for epoch in range(start_epoch, args.epochs):
         # Log the number of the epoch.
-        run['epoch'] = epoch
+        # run['epoch'] = epoch
 
         print("Running Epoch : {}".format(epoch + 1))
 
@@ -198,10 +198,10 @@ def train(args):
             losses_agg_tr = agg_losses(losses_agg_tr, losses)
 
             # Log the losses.
-            run['train/recon'].append(losses[0].item())
-            run['train/pred1'].append(losses[1].item())
-            run['train/pred2'].append(losses[2].item())
-            run['train/spectral'].append(losses[3].item())
+            # run['train/recon'].append(losses[0].item())
+            # run['train/pred1'].append(losses[1].item())
+            # run['train/pred2'].append(losses[2].item())
+            # run['train/spectral'].append(losses[3].item())
 
         model.eval()
         with torch.no_grad():
@@ -215,10 +215,10 @@ def train(args):
                 losses_agg_te = agg_losses(losses_agg_te, losses)
 
                 # Log the losses.
-                run['test/recon'].append(losses[0].item())
-                run['test/pred1'].append(losses[1].item())
-                run['test/pred2'].append(losses[2].item())
-                run['test/spectral'].append(losses[3].item())
+                # run['test/recon'].append(losses[0].item())
+                # run['test/pred1'].append(losses[1].item())
+                # run['test/pred2'].append(losses[2].item())
+                # run['test/spectral'].append(losses[3].item())
 
         # log losses
         loss_avg_tr, loss_avg_te = log_losses(epoch, losses_agg_tr, losses_agg_te, model.names)
@@ -227,22 +227,22 @@ def train(args):
         # save model checkpoint
         save_checkpoint(epoch, checkpoint_name)
 
-    run.stop()
+    # run.stop()
     print("Training is complete")
 
 
 if __name__ == '__main__':
     # Initialize neptune.
-    run = neptune.init_run(project="azencot-group/koopman-vae",
-                           api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNjg4NDkxMS04N2NhLTRkOTctYjY0My05NDY2OGU0NGJjZGMifQ==",
-                           )
+    # run = neptune.init_run(project="azencot-group/koopman-vae",
+    #                        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNjg4NDkxMS04N2NhLTRkOTctYjY0My05NDY2OGU0NGJjZGMifQ==",
+    #                        )
 
     # hyperparameters
     parser = define_args()
     args = parser.parse_args()
 
     # Log the hyperparameters used and the name.
-    run['config/hyperparameters'] = vars(args)
+    # run['config/hyperparameters'] = vars(args)
 
     # data parameters
     args.n_frames = 8
